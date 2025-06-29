@@ -1,13 +1,21 @@
+import "dotenv/config";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { RestApi, LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 import * as path from "path";
+import { Bucket } from "aws-cdk-lib/aws-s3";
 
 export class SummaryAudioStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    // Create Audio S3 Bucket
+    const audioBucket = new Bucket(this, "AudioOutputBucket", {
+      bucketName: `${cdk.Stack.of(this).stackName.toLowerCase()}-audio-bucket`,
+    });
 
     const summarizeFn = new NodejsFunction(this, "SummarizeFunction", {
       entry: path.join(__dirname, "../lambda/summarize.handler.ts"),
@@ -15,11 +23,26 @@ export class SummaryAudioStack extends cdk.Stack {
       bundling: {
         forceDockerBundling: false, // 👈 Use local instead of Docker
       },
+      environment: {
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+      },
     });
 
     const summaryApi = new RestApi(this, "SummaryApi", {
       restApiName: "AI Smart Summary API",
     });
+
+    // Grant the Lambda function permissions to use Polly
+    summarizeFn.addToRolePolicy(
+      new PolicyStatement({
+        actions: ["polly:SynthesizeSpeech"],
+        resources: ["*"],
+      })
+    );
+
+    // 👇 Grant read and write access to the Lambda
+    audioBucket.grantReadWrite(summarizeFn);
+    summarizeFn.addEnvironment("AUDIO_BUCKET_NAME", audioBucket.bucketName);
 
     const summarize = summaryApi.root.addResource("summarize");
     summarize.addMethod("POST", new LambdaIntegration(summarizeFn));
