@@ -7,6 +7,8 @@ import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { RestApi, LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 import * as path from "path";
 import { Bucket } from "aws-cdk-lib/aws-s3";
+import { Rule, Schedule } from "aws-cdk-lib/aws-events";
+import { LambdaFunction } from "aws-cdk-lib/aws-events-targets";
 
 export class SummaryAudioStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -29,6 +31,21 @@ export class SummaryAudioStack extends cdk.Stack {
       },
     });
 
+    const cleanupFn = new NodejsFunction(this, "CleanUpAudioFunction", {
+      entry: path.join(__dirname, "../lambda/cleanup.handler.ts"),
+      runtime: Runtime.NODEJS_20_X,
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        BUCKET_NAME: audioBucket.bucketName,
+      },
+    });
+
+    //cleanupFn scheduled event rule
+    new Rule(this, "DailyCleanupAudioRule", {
+      schedule: Schedule.cron({ minute: "0", hour: "0" }), // Every day at midnight UTC
+      targets: [new LambdaFunction(cleanupFn)],
+    });
+
     const summaryApi = new RestApi(this, "SummaryApi", {
       restApiName: "AI Smart Summary API",
     });
@@ -40,6 +57,8 @@ export class SummaryAudioStack extends cdk.Stack {
         resources: ["*"],
       })
     );
+
+    audioBucket.grantDelete(cleanupFn);
 
     // 👇 Grant read and write access to the Lambda
     audioBucket.grantReadWrite(summarizeFn);
