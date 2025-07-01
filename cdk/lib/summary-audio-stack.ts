@@ -20,6 +20,7 @@ export class SummaryAudioStack extends cdk.Stack {
     const summarizeFn = new NodejsFunction(this, "SummarizeFunction", {
       entry: path.join(__dirname, "../lambda/summarize.handler.ts"),
       runtime: Runtime.NODEJS_22_X,
+      timeout: cdk.Duration.seconds(30),
       bundling: {
         forceDockerBundling: false, // 👈 Use local instead of Docker
       },

@@ -1,4 +1,8 @@
-import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
+import {
+  PollyClient,
+  SynthesizeSpeechCommand,
+  VoiceId,
+} from "@aws-sdk/client-polly";
 import { Readable } from "stream";
 import { Buffer } from "buffer";
 
@@ -10,12 +14,20 @@ const polly = new PollyClient({});
  * @param {string} text the text to synthesize
  * @returns {Promise<Buffer>} a promise that resolves to the audio as an MP3 buffer
  */
-export const synthesizeSpeech = async (text: string): Promise<Buffer> => {
+
+type SynthesizeSpeechProps = {
+  text: string;
+  voiceId?: VoiceId;
+};
+export const synthesizeSpeech = async ({
+  text,
+  voiceId = "Joanna", // Default voice
+}: SynthesizeSpeechProps): Promise<Buffer> => {
   const { AudioStream } = await polly.send(
     new SynthesizeSpeechCommand({
       OutputFormat: "mp3",
       Text: text,
-      VoiceId: "Joanna", // TODO: Parametarized
+      VoiceId: voiceId,
     })
   );
 
