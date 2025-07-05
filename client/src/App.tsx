@@ -1,12 +1,12 @@
 import "./App.css";
-import { Button } from "@/components/ui/button";
+import AiSummarizer from "./features/ai-summarizer";
+import Provider from "./provider";
 
 function App() {
   return (
-    <>
-      <h1 className="text-3xl font-bold underline text-center">Hello world!</h1>
-      <Button>Click me</Button>
-    </>
+    <Provider>
+      <AiSummarizer />
+    </Provider>
   );
 }
 
