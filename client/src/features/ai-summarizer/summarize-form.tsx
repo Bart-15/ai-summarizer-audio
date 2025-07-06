@@ -9,12 +9,39 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { VOICES } from "@/utils/const";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  AiSummarizerValidationSchema,
+  type TAiSummarizerSchema,
+} from "./validation/ai-summarizer.validation";
+import { useSummarize } from "./hooks/useSummarize.hook";
 
 const SummarizeForm = () => {
+  const summarizeMutation = useSummarize();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    mode: "all",
+    resolver: zodResolver(AiSummarizerValidationSchema),
+    defaultValues: {
+      text: "",
+      context: "",
+      voiceId: "Joanna", // Default voice
+    },
+  });
+
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.95 },
     visible: { opacity: 1, scale: 1 },
   };
+
+  async function onSubmit(data: TAiSummarizerSchema) {
+    await summarizeMutation.mutateAsync(data);
+  }
 
   return (
     <motion.form
@@ -22,33 +49,42 @@ const SummarizeForm = () => {
       animate="visible"
       variants={containerVariants}
       transition={{ duration: 0.5 }}
-      onSubmit={() => {}}
+      onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-6 p-4 w-full max-w-[1000px] mx-auto"
     >
       <div>
         <Label
-          htmlFor="textInput"
+          htmlFor="text"
           className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
         >
           Text for summarization
         </Label>
         <Textarea
-          id="textInput"
+          id="text"
           placeholder="Enter the text here..."
-          className="w-full"
+          className="w-full mb-2"
+          {...register("text")}
+          aria-invalid={errors.text ? "true" : "false"}
+          aria-describedby="textError"
         />
+        {errors.text?.message && (
+          <p className="text-xs text-red-500">{errors.text?.message}</p>
+        )}
       </div>
       <div>
         <Label
-          htmlFor="contextInput"
+          htmlFor="context"
           className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
         >
           Context (optional)
         </Label>
         <Textarea
-          id="contextInput"
+          id="context"
           placeholder="Provide any context here..."
           className="w-full"
+          {...register("context")}
+          aria-invalid={errors.context ? "true" : "false"}
+          aria-describedby="contextError"
         />
       </div>
       <div>
@@ -58,16 +94,16 @@ const SummarizeForm = () => {
         >
           Voice Selection
         </Label>
-        <Select id="voiceSelect" className="w-full">
+        <Select {...register("voiceId")} defaultValue="Joanna">
           <SelectTrigger aria-label="Voice">
             <SelectValue placeholder="Select a voice" />
           </SelectTrigger>
           <SelectContent>
-            {/* Map over your VOICES array from [cdk/lambda/utils/const.ts](cci:7://file:///Users/user/Documents/practice-proj/ai-apps/ai-text-summarizer/cdk/lambda/utils/const.ts:0:0-0:0) to create SelectItems */}
-            {/* Example: */}
-            <SelectItem value="Joanna">Joanna</SelectItem>
-            <SelectItem value="Matthew">Matthew</SelectItem>
-            {/* Add more SelectItems here */}
+            {VOICES.map((voice) => (
+              <SelectItem key={voice} value={voice}>
+                {voice}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
