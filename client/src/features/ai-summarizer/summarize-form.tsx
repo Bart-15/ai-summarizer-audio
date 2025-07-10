@@ -10,19 +10,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { VOICES } from "@/utils/const";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AiSummarizerValidationSchema,
   type TAiSummarizerSchema,
 } from "./validation/ai-summarizer.validation";
-import { useSummarize } from "./hooks/useSummarize.hook";
+import type { UseMutationResult } from "@tanstack/react-query";
+import type { SummarizePayload } from "./service/ai-summarizer.service";
 
-const SummarizeForm = () => {
+type SummarizeForm = {
+  useSummarize: () => UseMutationResult<any, Error, SummarizePayload, unknown>;
+};
+
+const SummarizeForm = ({ useSummarize }: SummarizeForm) => {
   const summarizeMutation = useSummarize();
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm({
     mode: "all",
@@ -94,18 +100,28 @@ const SummarizeForm = () => {
         >
           Voice Selection
         </Label>
-        <Select {...register("voiceId")} defaultValue="Joanna">
-          <SelectTrigger aria-label="Voice">
-            <SelectValue placeholder="Select a voice" />
-          </SelectTrigger>
-          <SelectContent>
-            {VOICES.map((voice) => (
-              <SelectItem key={voice} value={voice}>
-                {voice}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Controller
+          control={control}
+          name="voiceId"
+          defaultValue="Joanna"
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger aria-label="Voice">
+                <SelectValue placeholder="Select a voice" />
+              </SelectTrigger>
+              <SelectContent>
+                {VOICES.map((voice) => (
+                  <SelectItem key={voice} value={voice}>
+                    {voice}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+        {errors.voiceId?.message && (
+          <p className="text-xs text-red-500">{errors.voiceId.message}</p>
+        )}
       </div>
       <div>
         <Button variant="default" type="submit" className="w-full">
