@@ -18,9 +18,15 @@ import {
 } from "./validation/ai-summarizer.validation";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { SummarizePayload } from "./service/ai-summarizer.service";
+import { cleanPayload } from "@/utils/cleanPayload";
 
 type SummarizeForm = {
-  useSummarize: () => UseMutationResult<any, Error, SummarizePayload, unknown>;
+  useSummarize: () => UseMutationResult<
+    unknown,
+    Error,
+    SummarizePayload,
+    unknown
+  >;
 };
 
 const SummarizeForm = ({ useSummarize }: SummarizeForm) => {
@@ -46,7 +52,8 @@ const SummarizeForm = ({ useSummarize }: SummarizeForm) => {
   };
 
   async function onSubmit(data: TAiSummarizerSchema) {
-    await summarizeMutation.mutateAsync(data);
+    const cleanedData = cleanPayload(data);
+    await summarizeMutation.mutateAsync(cleanedData);
   }
 
   return (
@@ -56,7 +63,7 @@ const SummarizeForm = ({ useSummarize }: SummarizeForm) => {
       variants={containerVariants}
       transition={{ duration: 0.5 }}
       onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-6 p-4 w-full max-w-[1000px] mx-auto"
+      className="flex flex-col gap-6 mx-auto mb-6"
     >
       <div>
         <Label
