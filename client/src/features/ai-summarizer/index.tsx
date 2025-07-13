@@ -10,6 +10,7 @@ const AiSummarizer = () => {
   const result = summarizeMutation.isSuccess && (
     <ContainerResult
       className="w-full"
+      audioUrl={summarizeMutation.data?.audioUrl}
       textResult={summarizeMutation.data?.summary || "No summary available"}
     />
   );

@@ -112,7 +112,7 @@ const SummarizeForm = ({ useSummarize }: SummarizeForm) => {
           name="voiceId"
           defaultValue="Joanna"
           render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
+            <Select  value={field.value} onValueChange={field.onChange}>
               <SelectTrigger aria-label="Voice">
                 <SelectValue placeholder="Select a voice" />
               </SelectTrigger>
