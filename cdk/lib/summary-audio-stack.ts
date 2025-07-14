@@ -65,6 +65,14 @@ export class SummaryAudioStack extends cdk.Stack {
     summarizeFn.addEnvironment("AUDIO_BUCKET_NAME", audioBucket.bucketName);
 
     const summarize = summaryApi.root.addResource("summarize");
+
+    // 👇 Add OPTIONS method to handle preflight requests
+    summarize.addCorsPreflight({
+      allowOrigins: ["http://localhost:5173"], // 👈 Match your Vite dev server or add your Production environment
+      allowMethods: ["OPTIONS", "POST"],
+      allowHeaders: ["Content-Type"],
+    });
+
     summarize.addMethod("POST", new LambdaIntegration(summarizeFn));
   }
 }

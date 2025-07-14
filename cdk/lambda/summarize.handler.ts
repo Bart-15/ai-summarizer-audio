@@ -50,6 +50,7 @@ export const handler = async (
       statusCode: 200,
       headers: {
         "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "http://localhost:5173",
       },
       body: JSON.stringify({ summary, audioUrl: signedUrl }),
     };
