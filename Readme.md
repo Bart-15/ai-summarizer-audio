@@ -12,7 +12,7 @@ A lightweight and serverless app that summarizes user input text using **OpenAI 
 - [Amazon S3](https://aws.amazon.com/s3/)
 - [API Gateway](https://aws.amazon.com/api-gateway/)
 - [OpenAI GPT-3.5](https://platform.openai.com/)
-- TypeScript
+- [TypeScript](https://www.typescriptlang.org/)
 
 ---
 
@@ -91,6 +91,46 @@ curl -X POST https://your-api-id.execute-api.amazonaws.com/prod/summarize \
 ```
 
 ---
+
+## 🖥️ Client Side Setup
+
+### Navigate to client directory
+```bash
+cd client
+```
+
+### Install dependencies
+```bash
+npm install
+```
+
+### Set up environment variables
+Create a `.env` file in the client directory:
+```env
+VITE_API_URL=your_api_gateway_url
+```
+
+### Run development server
+```bash
+npm run dev
+```
+
+### Build for production
+```bash
+npm run build
+```
+
+## 🎨 Client Tech Stack
+
+- [React 19](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vitejs.dev/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [Radix UI](https://www.radix-ui.com/)
+- [React Query](https://tanstack.com/query/latest)
+- [React Hook Form](https://react-hook-form.com/)
+- [Zod](https://zod.dev/)
+
 
 ## 👨‍💻 Author
 
